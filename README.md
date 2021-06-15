@@ -1,31 +1,26 @@
-## REST API with NodeJs and Express Framework 
+## REST API with NodeJs and Express Framework  and JWT 
 
-### Login to Heroku 
+### End points are:
 ```
-heroku login
+BASE_URL='https://u4saif.herokuapp.com/api 
 ```
-### Create Procfile with content 
 ```
-web: node index.js
-``` 
-
-### Run this command 
+For post : /post/count?limit=10 , For Delete : /delete/'+ id
 ```
-heroku create <projectName Optional>
-```
+ 
+ Make Sure you Have Auth Token in your API Header like below: 
 
-### Use git comand 
-```
-git add . 
-git commit -m "first commit"
-
-```
-
-### Push the code to Heroku server
-
-````
-git push heroku master
-````
-
-### Vola!!! the APP is now pushed to cloud
-
+ ```
+ intercept(req: HttpRequest<any>, next: HttpHandler):   Observable<HttpEvent<any>> {
+    // All HTTP requests are going to go through this method
+    if (localStorage.getItem("token")) {
+      let token= "bear "+ localStorage.getItem("token");
+      const RequestWithToken = req.clone({
+        
+        headers: req.headers.set('Authorization', token),
+      });
+      return next.handle(RequestWithToken);
+    }
+    return next.handle(req);
+}
+ ```
