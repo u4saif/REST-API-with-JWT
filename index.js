@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 const bodyParser= require("body-parser");
 const app = express();
 const port= process.env.PORT || 3000;
-
-var cors = require('cors')
+const jwt=require("jsonwebtoken");
+const cors = require('cors')
 
 //Fix for cors error on post
 app.use(cors())
@@ -20,6 +20,18 @@ app.use(bodyParser.json());
 
 //accessing the env variables
 require("dotenv/config");
+
+//JWT to verify authentic user access
+app.use(checkTokenExist,(req, res, next) => { 
+  jwt.verify(req.token,process.env.secrateKey, async (err,auth)=>{
+      if(err){
+          res.status(403).send("Forbidden inValid token");
+      }else{
+          next();
+
+      }
+  })
+});
 
 //Import  Routes 
 const postRoute= require("./routes/post");
@@ -37,6 +49,19 @@ mongoose.connect(
   { useNewUrlParser: true, useUnifiedTopology: true }, () => {
   console.warn("Connected to DB.");
 });
+
+
+function checkTokenExist(req,res,next){
+  const bearHeader=req.headers["authorization"]
+  if(typeof bearHeader !='undefined'){
+      const bearer=bearHeader.split(" ");
+      const bearerToken=bearer[1];
+      req.token=bearerToken;
+      next();
+  }else{
+      res.status(403).send("Forbidden");
+  }
+}
 
 //Start the app at port 3000
 app.listen(port, () => {
